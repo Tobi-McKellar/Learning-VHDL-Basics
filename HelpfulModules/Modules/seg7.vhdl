@@ -6,6 +6,7 @@ use ieee.numeric_std.all;
 
 -- A 7 segment display driver, with a 4 bit input and a decimal place.
 -- There are special codes given to display a blank digit, all segments, and a dash (-).
+-- This is modular and allows the user to change the active state of the segments and the overall display.
 
 -- The segment layout used is as shown below.
         
@@ -21,15 +22,17 @@ use ieee.numeric_std.all;
 
 entity seg7 is
     generic(
-        active_state : std_logic := '0'
+        segment_active_state : std_logic := '1';
+        display_active_state : std_logic := '0'
     );
     port(
         clk  : in std_logic;
         rst  : in std_logic;
         data : in std_logic_vector(3 downto 0);
         dp   : in std_logic;
-        an   : in std_logic;
-        seg  : out std_logic_vector(7 downto 0)
+        en   : in std_logic;
+        seg  : out std_logic_vector(7 downto 0);
+        an   : out std_logic
     );
 end entity seg7;
 
@@ -52,8 +55,7 @@ begin
                  "00001100" when "1001",
                  "01100000" when "1011",  -- dash
                  "11111111" when others;
-
-    seg(6 downto 0) <= s_seg(6 downto 0) when (an = '1') else (others => not active_state);
-    seg(7) <= active_state when (dp = '1' and an = '1') else not active_state;
-
+    seg(6 downto 0) <= s_seg(6 downto 0) when (en = '1') else (others => not segment_active_state);
+    seg(7) <= segment_active_state when (dp = '1' and en = '1') else not segment_active_state;
+    an <= display_active_state when (en = '1') else not display_active_state;
 end architecture rtl;

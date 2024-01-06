@@ -6,10 +6,10 @@ SIMULATOR = ghdl
 SOURCE_FILES := $(wildcard Modules/*.vhdl)
 TESTBENCH_FILES = $(wildcard Testbenches/*.vhdl)
 # Set the testbench entity
-TESTBENCH_ENTITY = bintobcd_tb
+TESTBENCH_ENTITY = seg7_tb
 
 # Set the output VCD file
-VCD_FILE = bintobcd.ghw
+VCD_FILE = seg7_tb.ghw
 
 # Default target
 all: run
