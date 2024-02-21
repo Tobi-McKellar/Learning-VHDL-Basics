@@ -10,7 +10,7 @@ architecture sim of seg7_tb is
 
     component seg7 is
         generic(
-            segment_active_state : std_logic := '1'
+            segment_active_state : std_logic := '1';
             display_active_state : std_logic := '0'
         );
         port(
@@ -19,8 +19,8 @@ architecture sim of seg7_tb is
             data : in std_logic_vector(3 downto 0);
             dp   : in std_logic;
             en   : in std_logic;
-            seg  : out std_logic_vector(7 downto 0)
-            an   : out std_logic;
+            seg  : out std_logic_vector(7 downto 0);
+            an   : out std_logic
         );
     end component;
 
@@ -40,7 +40,7 @@ begin
 
     seg7_inst : seg7
     generic map(
-        active_state => '1'
+        segment_active_state => '1'
     )
     port map(
         clk  => clk,
@@ -91,4 +91,8 @@ begin
         data <= "1001";
         wait for CLK_PERIOD;
         dp <= '1';
-
+        wait for CLK_PERIOD;
+        simdone <= true;
+        wait;
+    end process;
+end architecture sim;
