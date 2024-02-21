@@ -6,10 +6,10 @@ SIMULATOR = ghdl
 SOURCE_FILES := $(wildcard Modules/*.vhdl)
 TESTBENCH_FILES = $(wildcard Testbenches/*.vhdl)
 # Set the testbench entity
-TESTBENCH_ENTITY = seg7_tb
+TESTBENCH_ENTITY = full_adder_tb
 
 # Set the output VCD file
-VCD_FILE = seg7_tb.ghw
+VCD_FILE = full_adder_tb.ghw
 
 # Default target
 all: run
@@ -28,5 +28,15 @@ view:
 # Clean target to remove generated files
 clean:
 	rm -f *.o *.cf $(VCD_FILE)
-	rm -rf bld vcd
-	mkdir bld vcd
+	rm -rf bld vcd schematics Verilog json
+	mkdir bld vcd schematics Verilog json
+
+
+MODULES = half_adder full_adder
+schematic: $(MODULES)
+$(MODULES):
+	cd bld;\
+	ghdl -a ../Modules/$@.vhdl;\
+	$(VHDL_COMPILER) --synth --out=verilog $@ > ../Verilog/$@.v;\
+	yosys -p "prep -top $@; write_json ../json/$@.json" ../Verilog/$@.v;\
+	netlistsvg ../json/$@.json -o ../schematics/$@.svg;\
