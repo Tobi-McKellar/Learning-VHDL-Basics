@@ -2,14 +2,17 @@
 VHDL_COMPILER = ghdl
 SIMULATOR = ghdl
 
+#Package for pnr
+PACKAGE = qn84
+
 # Set the source files
 SOURCE_FILES := $(wildcard Modules/*.vhdl)
 TESTBENCH_FILES = $(wildcard Testbenches/*.vhdl)
 # Set the testbench entity
-TESTBENCH_ENTITY = matmul_tb
+TESTBENCH_ENTITY = uart_tx_tb
 
 # Set the output VCD file
-VCD_FILE = matmul_tb.ghw
+VCD_FILE = uart_tx_tb.ghw
 
 # Default target
 all: run
@@ -32,7 +35,7 @@ clean:
 	mkdir bld vcd schematics Verilog json
 
 
-MODULES = matmul
+MODULES = blinky
 schematic: $(MODULES)
 $(MODULES):
 	cd bld;\
@@ -46,10 +49,7 @@ $(MODULES):
 	cd bld;\
 	ghdl -a ../Modules/$@.vhdl;\
 	$(VHDL_COMPILER) --synth --out=verilog $@ > ../Verilog/$@.v;\
-	nextpnr -ice40 --hx8k --json $@.json --pcf $@.pcf --asc $@.asc;\
-
-# yosys -p 'synth_ice40 -top $@ -json ../json/$@.json' ../Verilog/$@.v;\    
-# 	#    # run place and route
-# 	# icepack $@.asc $@.bin;\                                               # generate binary bitstream file
-# 	# iceburn $@.bin;\        #for iceblink board use this as not FTDI based                                                   # upload design to iCEstick
-# 	# icetime -tmd lp8k $@.asc;\
+	yosys -p "synth_ice40 -top $@; write_json ../json/$@.json" ../Verilog/$@.v;\
+	nextpnr-ice40 --lp1k --package $(PACKAGE) --json ../json/$@.json --pcf ../../pinmapping.pcf --pcf-allow-unconstrained --asc $@.asc;\
+	icepack -v $@.asc $@.bin;\
+	iceburn -e -v -w $@.bin;\
