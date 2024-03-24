@@ -7,10 +7,10 @@ use ieee.numeric_std.all;
 -- More comprehensive testing is actually done in the uart_rx testbench,
 -- as this validates the ability for the two modules to communicate properly.
 
-entity uart_tx_test is
+entity uart_tx_tb is
 end entity;
 
-architecture test of uart_tx_test is
+architecture test of uart_tx_tb is
 
 component uart_tx is
     generic (

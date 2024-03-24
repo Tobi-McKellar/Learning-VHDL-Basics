@@ -110,9 +110,9 @@ begin
     tx_serial_out <= s_tx_serial_out_reg;
     tx_active <= '0' when s_tx_state = idle else '1';
      -- s_tx_state_check is only useful for debugging. Can safely be removed to optimise LUT usage.
-    s_tx_state_check <= 0 when s_tx_state = idle else
-                    1 when s_tx_state = startbits else
-                    2 when s_tx_state = databits else
-                    3 when s_tx_state = stopbits;
+    -- s_tx_state_check <= 0 when s_tx_state = idle else
+    --                 1 when s_tx_state = startbits else
+    --                 2 when s_tx_state = databits else
+    --                 3 when s_tx_state = stopbits;
 
 end architecture;
