@@ -17,8 +17,7 @@ architecture Behavioral of tb_capacitive_button is
         port (
             clk       : in  std_logic;  -- System clock
             reset     : in  std_logic;  -- Asynchronous reset
-            cap_input : in std_logic; -- Capacitive button pin
-            cap_output: out std_logic;
+            cap_inout : inout std_logic; -- Capacitive button pin
             led       : out std_logic   -- LED output
         );
     end component;
@@ -26,15 +25,14 @@ architecture Behavioral of tb_capacitive_button is
     -- Signals
     signal clk       : std_logic := '0';
     signal reset     : std_logic := '0';
-    signal cap_input_tb : std_logic := '0';
-    signal cap_output_tb_delayed : std_logic := '0';
-    signal cap_output_tb : std_logic;
+    signal cap_inout_tb : std_logic := 'Z';
+    signal cap_inout_tb_delayed : std_logic := '0';
     signal led       : std_logic;
 
     -- Constants
     constant CLK_PERIOD : time := 30 ns; -- Clock period for 33.3 MHz
     constant UNPRESSED_RISE_TIME : integer := integer(0.35*100.0e3*100.0e-12/30.0e-9); -- Approx cycles for unpressed
-    constant PRESSED_RISE_TIME : integer := integer(0.35*100.0e3*105.0e-12/30.0e-9); -- Approx cycles for pressed
+    constant PRESSED_RISE_TIME : integer := integer(0.35*100.0e3*115.0e-12/30.0e-9); -- Approx cycles for pressed
 
     signal uprt : integer := UNPRESSED_RISE_TIME;
     signal prt : integer := PRESSED_RISE_TIME;
@@ -44,8 +42,6 @@ architecture Behavioral of tb_capacitive_button is
     -- Test signals for button simulation
     signal button_state : std_logic := '0'; -- Represents the physical button state
     signal rise_counter : integer := 0;    -- Counter to simulate rise time
-
-    signal discharge_flag : boolean := true; -- Tracks discharge phase
 
     signal simdone : boolean := false;
 begin
@@ -60,8 +56,7 @@ begin
         port map (
             clk       => clk,
             reset     => reset,
-            cap_input => cap_input_tb,
-            cap_output => cap_output_tb,
+            cap_inout => cap_inout_tb,
             led       => led
         );
 
@@ -111,21 +106,23 @@ begin
     begin
         if simdone = false then
             wait until rising_edge(clk);
-            cap_output_tb_delayed <= cap_output_tb;
-                if (cap_output_tb_delayed = '0' and cap_output_tb = 'Z' and button_state = '0') then
+            cap_inout_tb_delayed <= cap_inout_tb;
+                if (cap_inout_tb_delayed = '0' and cap_inout_tb = 'Z' and button_state = '0') then
                     wait for UNPRESSED_RISE_TIME * CLK_PERIOD;
-                    cap_input_tb <= '1';
+                    cap_inout_tb <= '1';
                     wait until falling_edge(clk);
-                    cap_input_tb <= '0';
+                    cap_inout_tb <= 'Z';
                     -- test <= '1';
-                else if (cap_output_tb_delayed = '0' and cap_output_tb = 'Z' and button_state = '1') then
+                else if (cap_inout_tb_delayed = '0' and cap_inout_tb = 'Z' and button_state = '1') then
                     wait for PRESSED_RISE_TIME * CLK_PERIOD;
-                    cap_input_tb <= '1';
+                    cap_inout_tb <= '1';
                     wait until falling_edge(clk);
-                    cap_input_tb <= '0';
+                    cap_inout_tb <= 'Z';
                     -- test <= '1';
                 end if;
             end if;
+        else
+            wait;
         end if;
     end process;
 end Behavioral;
